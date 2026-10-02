@@ -7,6 +7,6 @@ RUN cargo build --release
 FROM debian:stable-slim
 
 COPY --from=builder target/release/svenskabot /usr/bin/svenskabot
-COPY tags.json /etc/svenskabot/tags.json 
+COPY ./tags.json /etc/svenskabot/tags.json 
 
-CMD "svenskabot /etc/svenskabot/tags.json"
+CMD ["svenskabot", "/etc/svenskabot/tags.json"]
