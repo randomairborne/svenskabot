@@ -1,3 +1,4 @@
+#![allow(clippy::result_large_err)]
 use poise::serenity_prelude as serenity;
 use std::collections::HashMap;
 
@@ -5,7 +6,7 @@ struct Data {
     tags: HashMap<String, String>,
 } // User data, which is stored and accessible in all command invocations
 
-type Context<'a> = poise::Context<'a, Data, Error>;
+type Context<'a> = poise::Context<'a, Data, poise::serenity_prelude::Error>;
 
 /// Gets a tag
 #[poise::command(slash_command)]
@@ -14,7 +15,7 @@ async fn tag(
     #[description = "Tag name"]
     #[autocomplete = "name_autocomplete"]
     name: String,
-) -> Result<(), Error> {
+) -> Result<(), poise::serenity_prelude::Error> {
     let response = ctx
         .data()
         .tags
@@ -79,10 +80,4 @@ async fn main() {
         .framework(framework)
         .await;
     client.unwrap().start().await.unwrap();
-}
-
-#[derive(thiserror::Error, Debug)]
-enum Error {
-    #[error("serenity error")]
-    Serenity(#[from] poise::serenity_prelude::Error),
 }
