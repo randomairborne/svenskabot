@@ -1,11 +1,14 @@
 #![allow(clippy::result_large_err)]
 use poise::serenity_prelude::CreateEmbed;
 use poise::{CreateReply, serenity_prelude as serenity};
+use rand::seq::IndexedRandom as _;
 use std::collections::HashMap;
 use std::fmt::Write;
 
+#[derive(serde::Deserialize)]
 struct Data {
-    tags: HashMap<String, String>,
+    faqs: HashMap<String, String>,
+    questions: Vec<String>,
 } // User data, which is stored and accessible in all command invocations
 
 type Context<'a> = poise::Context<'a, Data, poise::serenity_prelude::Error>;
@@ -20,7 +23,7 @@ async fn faq(
 ) -> Result<(), poise::serenity_prelude::Error> {
     let response = ctx
         .data()
-        .tags
+        .faqs
         .get(&name)
         .map_or("That FAQ item doesn't exist.", |v| v);
     let embed = CreateEmbed::new().description(response);
@@ -34,7 +37,7 @@ async fn name_autocomplete(
 ) -> serenity::CreateAutocompleteResponse {
     let mut choices: Vec<_> = ctx
         .data()
-        .tags
+        .faqs
         .keys()
         .filter(|v| v.contains(partial))
         .take(25)
@@ -52,7 +55,7 @@ async fn name_autocomplete(
 #[poise::command(slash_command)]
 async fn faqs(ctx: Context<'_>) -> Result<(), poise::serenity_prelude::Error> {
     let mut response = String::with_capacity(2000);
-    for key in ctx.data().tags.keys() {
+    for key in ctx.data().faqs.keys() {
         let _ = writeln!(response, "- `{key}`");
     }
     let embed = CreateEmbed::new().description(response);
@@ -61,9 +64,29 @@ async fn faqs(ctx: Context<'_>) -> Result<(), poise::serenity_prelude::Error> {
     Ok(())
 }
 
+/// Gets a random conversation-starter
+#[poise::command(
+    slash_command,
+    name_localized("sv-SE", "fråga"),
+    description_localized("sv-SE", "Hämtar en random isbrytare")
+)]
+async fn question(
+    ctx: Context<'_>,
+) -> Result<(), poise::serenity_prelude::Error> {
+    let question = {
+        let mut rng = rand::rng();
+        ctx.data()
+            .questions
+            .choose(&mut rng)
+            .map_or("No questions configured", |v| v)
+    };
+    ctx.say(question).await?;
+    Ok(())
+}
+
 #[tokio::main]
 async fn main() {
-    let tags = {
+    let config: Data = {
         let config_path = std::env::args_os()
             .nth(1)
             .expect("1 argument required, path to config");
@@ -78,7 +101,7 @@ async fn main() {
 
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
-            commands: vec![faq(), faqs()],
+            commands: vec![faq(), faqs(), question()],
             ..Default::default()
         })
         .setup(|ctx, _ready, framework| {
@@ -88,7 +111,7 @@ async fn main() {
                     &framework.options().commands,
                 )
                 .await?;
-                Ok(Data { tags })
+                Ok(config)
             })
         })
         .build();

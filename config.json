@@ -1,4 +1,5 @@
 {
+  "faqs": {
     "meta": "[FAQs about Swedish](<https://www.reddit.com/r/Svenska/wiki/faq/#wiki_frequently_asked_questions>)",
     "word-order": "[Swedish Word Order Explainer](<https://www.reddit.com/r/Svenska/wiki/faq/#wiki_word_order>)",
     "word-order/main": "[Word order in main clauses](<https://www.reddit.com/r/Svenska/wiki/faq/#wiki_word_order_in_main_clauses>)",
@@ -34,4 +35,6 @@
     "pronunciation/retroflex": "[Retroflex consonants](<https://www.reddit.com/r/Svenska/wiki/faq/#wiki_retroflex_consonants>)",
     "pronunciation/r-d": "[When is /d/ pronounced as /r/?](<https://www.reddit.com/r/Svenska/wiki/faq/#wiki_.A723_when_is_.2Fd.2F_pronounced_as_.2Fr.2F.3F>)",
     "pronunciation/lidingö-i": "[How is the Swedish /i/ pronounced? How do I buzz it?](<https://www.reddit.com/r/Svenska/wiki/faq/#wiki_.A724_how_is_the_swedish_.2Fi.2F_pronounced.3F_how_do_i_buzz_it.3F"
+  },
+  "questions": ["Ingen har gjort någon isbrytare än. Kan du tänka på en och pinga <@788222689126776832>"]
 }
