@@ -52,7 +52,7 @@ async fn name_autocomplete(
 #[poise::command(slash_command)]
 async fn faqs(ctx: Context<'_>) -> Result<(), poise::serenity_prelude::Error> {
     let mut response = String::with_capacity(2000);
-    for (key, _value) in ctx.data().tags.iter() {
+    for key in ctx.data().tags.keys() {
         let _ = writeln!(response, "- `{key}`");
     }
     let embed = CreateEmbed::new().description(response);
