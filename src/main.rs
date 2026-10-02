@@ -1,6 +1,8 @@
 #![allow(clippy::result_large_err)]
-use poise::serenity_prelude as serenity;
+use poise::serenity_prelude::CreateEmbed;
+use poise::{CreateReply, serenity_prelude as serenity};
 use std::collections::HashMap;
+use std::fmt::Write;
 
 struct Data {
     tags: HashMap<String, String>,
@@ -8,11 +10,11 @@ struct Data {
 
 type Context<'a> = poise::Context<'a, Data, poise::serenity_prelude::Error>;
 
-/// Gets a tag
+/// Gets a link to a FAQ entry
 #[poise::command(slash_command)]
-async fn tag(
+async fn faq(
     ctx: Context<'_>,
-    #[description = "Tag name"]
+    #[description = "FAQ name"]
     #[autocomplete = "name_autocomplete"]
     name: String,
 ) -> Result<(), poise::serenity_prelude::Error> {
@@ -20,10 +22,12 @@ async fn tag(
         .data()
         .tags
         .get(&name)
-        .map_or("That tag doesn't exist.", |v| v);
-    ctx.say(response).await?;
+        .map_or("That FAQ item doesn't exist.", |v| v);
+    let embed = CreateEmbed::new().description(response);
+    ctx.send(CreateReply::new().embed(embed)).await?;
     Ok(())
 }
+
 async fn name_autocomplete(
     ctx: Context<'_>,
     partial: &str,
@@ -44,6 +48,19 @@ async fn name_autocomplete(
     serenity::CreateAutocompleteResponse::new().set_choices(choices)
 }
 
+/// Gets a list of FAQ links
+#[poise::command(slash_command)]
+async fn faqs(ctx: Context<'_>) -> Result<(), poise::serenity_prelude::Error> {
+    let mut response = String::with_capacity(2000);
+    for (key, _value) in ctx.data().tags.iter() {
+        let _ = writeln!(response, "- `{key}`");
+    }
+    let embed = CreateEmbed::new().description(response);
+    ctx.send(CreateReply::new().embed(embed).ephemeral(true))
+        .await?;
+    Ok(())
+}
+
 #[tokio::main]
 async fn main() {
     let tags = {
@@ -61,7 +78,7 @@ async fn main() {
 
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
-            commands: vec![tag()],
+            commands: vec![faq(), faqs()],
             ..Default::default()
         })
         .setup(|ctx, _ready, framework| {
